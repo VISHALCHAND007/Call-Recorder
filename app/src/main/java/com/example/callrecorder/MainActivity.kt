@@ -1,10 +1,12 @@
 package com.example.callrecorder
 
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -13,13 +15,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.callrecorder.ui.theme.CallRecorderTheme
 import com.example.callrecorder.uicomponents.ShowDialog
+import com.example.callrecorder.utils.PhoneCallReceiver
 import com.example.callrecorder.utils.ReadPhoneStateTextProvider
 import com.example.callrecorder.utils.RecordAudioPermissionTextProvider
 import com.example.callrecorder.viewModel.MainViewModel
 
 class MainActivity : ComponentActivity() {
+    lateinit var phoneNum: String
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        phoneNum = intent.getStringExtra(TAG).toString()
+        Log.e(TAG, " ye rha: $phoneNum")
         setContent {
             CallRecorderTheme {
                 val viewModel = viewModel<MainViewModel>()
@@ -27,7 +36,8 @@ class MainActivity : ComponentActivity() {
 
                 val permissionToRequest = arrayOf(
                     android.Manifest.permission.RECORD_AUDIO,
-                    android.Manifest.permission.READ_PHONE_STATE
+                    android.Manifest.permission.READ_PHONE_STATE,
+                    android.Manifest.permission.READ_CALL_LOG
                 )
                 val multiplePermissionResultLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -75,8 +85,13 @@ class MainActivity : ComponentActivity() {
                                 viewModel.dismissDialog()
                             })
                     }
+                MainScreen()
             }
         }
+    }
+
+    companion object {
+        const val TAG = "here=="
     }
 }
 fun Activity.launchAppSettings() {
